@@ -1,5 +1,3 @@
-
-
 /**
  *
  * WAVLTree
@@ -8,6 +6,7 @@
  * distinct integer keys and info
  *
  */
+//-------------------------------------------WAVLTree Class Builders-----------------------------------
 
 public class WAVLTree {
 	
@@ -18,12 +17,17 @@ public class WAVLTree {
 	WAVLNode maxnode;
 	int size = 0;
 
+
+//------------------------------------WAVLTree Class Methods-----------------------------------
+
+//------------------------------------TreeIsEmpty----------------------------------------------
   /**
    * public boolean empty()
    *
    * returns true if and only if the tree is empty
    *
    */
+
  public boolean empty() {
 	  if(this.root == null){
 		  return true;
@@ -32,6 +36,9 @@ public class WAVLTree {
 		  return false;
 	  }
   }
+
+//------------------------------------SearchTreeKey----------------------------------------------
+
  /**
    * public String search(int k)
    *
@@ -56,6 +63,10 @@ public class WAVLTree {
 	return null;
  }
 
+
+//------------------------------------InsertTreeNode----------------------------------------------
+
+ 
   /**
    * public int insert(int k, String i)
    *
@@ -100,6 +111,9 @@ public class WAVLTree {
 	//		}
 //		}
 // }
+
+ 
+//------------------------------------DeleteTreeNode----------------------------------------------
 
   /**
    * public int delete(int k)
@@ -174,10 +188,17 @@ public class WAVLTree {
     * Returns the iîfo of the item with the smallest key in the tree,
     * or null if the tree is empty
     */
+
+ 
+//------------------------------------MinimumValue----------------------------------------------
+
  public String min()
  {
 	return this.minode.info;
  }
+
+//------------------------------------MaximumValue----------------------------------------------
+
 
    /**
     * public String max()
@@ -189,6 +210,9 @@ public class WAVLTree {
  {
 	 return this.maxnode.info;
  }
+
+ 
+//------------------------------------KeysToArray----------------------------------------------
 
   /**
    * public int[] keysToArray()
@@ -207,6 +231,8 @@ public class WAVLTree {
         }
         return arr;             
   }
+
+//------------------------------------InfoToArray----------------------------------------------
 
   /**
    * public String[] infoToArray()
@@ -238,7 +264,10 @@ public class WAVLTree {
     	return this.size;
    }
 
-  /**
+//----------------------------------------------------------------------------------------
+//------------------------------WAVLNode Class Builders-----------------------------------
+ 
+   /**
    * public class WAVLNode
    *
    * If you wish to implement classes other than WAVLTree
@@ -254,11 +283,17 @@ public class WAVLTree {
 	  WAVLNode left;
 	  WAVLNode parent;
 	  
+//------------------------------------WAVLNode Class Methods-----------------------------------
+
+//------------------------------------CreateNewNode----------------------------------------------
+	  
 	  public WAVLNode(int key, String info) {
 		this.key = key;
 		this.info = info;
 		
 	}
+
+//------------------------------------StringOfSortedKeys----------------------------------------------
 	  
 	  public String infoToString(WAVLNode node, String str){
 		  if (node.equals(null)){
@@ -272,7 +307,9 @@ public class WAVLTree {
 			  return infoToString(node.left, str)+node.info+ " "+infoToString(node.right, str);
 		  }	  
 	  }
-	  
+
+//------------------------------------StringOfSortedValues----------------------------------------------
+
 	  public String keyToString(WAVLNode node, String str){
 		  if (node.equals(null)){
 			  return str;			  
@@ -285,9 +322,10 @@ public class WAVLTree {
 			  return infoToString(node.left, str)+node.key + " "+infoToString(node.right, str);
 		  }	  
 	  }
-	  
-
   }
+  
+//------------------------------------MainFunction----------------------------------------------
+
   public static void main (String[] args){
 	  WAVLTree tree = new WAVLTree();
 	  WAVLNode yosi =tree.new WAVLNode(1, "2"); 
