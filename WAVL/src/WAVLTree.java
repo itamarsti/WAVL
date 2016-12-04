@@ -1,4 +1,4 @@
-import WAVLTree.WAVLNode;
+
 
 /**
  *
@@ -75,31 +75,31 @@ public class WAVLTree {
 				return -1;
 			}
 			else if(key > k){
-				next = cur.left;
-				if (next == null){
+		//		next = cur.left;
+			//	if (next == null){
 					//place to be added found
 					cur.left = add;
 					add.parent = cur;
 					return rebalance(add,0);
 				}
 				else{
-					cur = next;
+	//				cur = next;
 				}
 			}
-			else{
-				next = cur.right;
-				if (next == null){
+	//		else{
+//				next = cur.right;
+//				if (next == null){
 					//place to be added found
 					cur.right = add;
 					add.parent = cur;
 					return rebalance(add,0);
 				}
-				else{
-					cur = next;
-				}
-			}
-		}
- }
+		//		else{
+	//				cur = next;
+	//			}
+	//		}
+//		}
+// }
 
   /**
    * public int delete(int k)
@@ -160,7 +160,7 @@ public class WAVLTree {
 	   if (parank == 0){
 		   parent.rank = 1;
 		   cnt += 1;
-		   this.root.rebalance(parent);
+//		   this.root.rebalance(parent);
 	   }
 	   
 	   return cnt;
