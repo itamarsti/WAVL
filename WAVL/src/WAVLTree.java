@@ -77,40 +77,36 @@ public class WAVLTree {
    */
  public int insert(int k, String i) {
 	   //initialize 
-	   WAVLNode cur = this.root; //####################
+	   WAVLNode cur = this.root; 
 	   WAVLNode add = new WAVLNode(k,i);
-		while(cur !=null){
-			int key = cur.key;
-			//if key is in tree
-			if (key == k){
+	   while(cur!=null){          
+			if (cur.key == k){           //if key is in tree
 				return -1;
 			}
-			else if(key > k){
-		//		next = cur.left;
-			//	if (next == null){
-					//place to be added found
-					cur.left = add;
-					add.parent = cur;
-					return rebalance(add,0);
+			else if(k<cur.key){
+				cur = cur.left;
+				if (cur == null){        //place to be added found
+					cur = add;
+					add.parent = cur.parent;
+					return rebalance(add,0);         //****need to work on****
 				}
 				else{
-	//				cur = next;
+					continue;			//continue to the next loop
 				}
 			}
-	//		else{
-//				next = cur.right;
-//				if (next == null){
-					//place to be added found
+			else{
+				cur = cur.right;
+				if (cur == null){        //place to be added found
 					cur.right = add;
-					add.parent = cur;
-					return rebalance(add,0);
+					add.parent = cur.parent;
+					return rebalance(add,0);     //****need to work on****
 				}
-		//		else{
-	//				cur = next;
-	//			}
-	//		}
-//		}
-// }
+				else{
+					continue;
+				}
+			}
+		}
+ 	}
 
  
 //------------------------------------DeleteTreeNode----------------------------------------------
