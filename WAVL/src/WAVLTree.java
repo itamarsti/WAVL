@@ -46,23 +46,10 @@ public boolean empty() {
   * returns the info of an item with key k if it exists in the tree
   * otherwise, returns null
   */
-public String search(int k){
-	WAVLNode cur = this.root;
-	while(cur !=null){
-		int key = cur.key;
-		if (key==k){
-			return cur.info;
-		}
-		else if(key > k){
-			cur = cur.left;
-		}
-		else{
-			cur = cur.right;
-		}
+	public String search(int k){
+		WAVLNode node = searchNode(k);
+		return node.info;
 	}
-	//if tree is empty or key not found
-	return null;
-}
 
 
 //------------------------------------InsertTreeNode----------------------------------------------
@@ -109,7 +96,7 @@ public int insert(int k, String i) {
 					tmp.left = add;
 					add.parent = tmp;
 					this.size ++;
-					return rebalance(add);         //****need to work on****
+					return rebalanceInsert(add);         //****need to work on****
 				}
 				else{
 					continue;			//continue to the next loop
@@ -122,7 +109,7 @@ public int insert(int k, String i) {
 					tmp.right = add;
 					add.parent = tmp;
 					this.size ++;
-					return rebalance(add);     //****need to work on****
+					return rebalanceInsert(add);     //****need to work on****
 				}
 				else{
 					continue;
@@ -133,63 +120,9 @@ public int insert(int k, String i) {
 	}
 
 
-//------------------------------------DeleteTreeNode----------------------------------------------
+//----------------------------------------------InsertRebalance-------------------------------
 
- /**
-  * public int delete(int k)
-  *
-  * deletes an item with key k from the binary tree, if it is there;
-  * the tree must remain valid (keep its invariants).
-  * returns the number of rebalancing operations, or 0 if no rebalancing operations were needed.
-  * returns -1 if an item with key k was not found in the tree.
-  */
-public int delete(int k)
-{
-	   WAVLNode cur = this.root;
-	   WAVLNode next = cur;
-		while(cur !=null){
-			int key = cur.key;
-			//if key is in tree
-			if (key == k){
-				int parkey = cur.parent.key;
-				
-				return -1;
-			}
-			else if(key > k){
-				//look left
-				next = cur.left;
-				if (next == null){
-					return -1;
-				}
-				else if(next.key == k){
-					cur.left = null;
-					return rebalance(cur);
-				}
-				else{
-					cur = next;
-				}
-			}
-			else{
-				//look right
-				next = cur.right;
-				if (next == null){
-					return -1;
-				}
-				else if(next.key == k){
-					cur.right = null;
-					return rebalance(cur);
-				}
-				else{
-					cur = next;
-				}
-			}
-		}
-		//if tree is empty
-		return -1;
-}
-//----------------------------------------------Rebalance-------------------------------
-
-	private int rebalance(WAVLNode node){
+	private int rebalanceInsert(WAVLNode node){
 		node.rank = 0; //can delete later if new node default rank is 0
 		int cnt = 0;
 		WAVLNode parent = node.parent;
@@ -201,7 +134,7 @@ public int delete(int k)
 			parent.rank ++;
 			cnt++;
 			//if case 1....
-			cnt = rebalance_rec(parent, 0); //recursive rebalancing calls (calls helper func)
+			cnt = rebalanceInsertRec(parent, 0); //recursive rebalancing calls (calls helper func)
 			//if case 2
 		}
 		
@@ -209,19 +142,20 @@ public int delete(int k)
 	   
 } //end of main rebalance func
 	
-	
-	private int rebalance_rec(WAVLNode node, int cnt){
+//------------------------------------InsertRebalanceRec----------------------------------------------
+
+	private int rebalanceInsertRec(WAVLNode node, int cnt){
 		if (node == this.root){ //end condition : reached root
 			return cnt;
 		}
-		int check = Case(node); //check which case needs to be handled (calls helper func)
+		int check = caseInsrt(node); //check which case needs to be handled (calls helper func)
 		switch (check){
 			case 0:
 				return cnt;
 			case 1:
 				node.parent.rank ++;				//promote parent and continue rebalancing
 				cnt++;
-				rebalance_rec(node.parent, cnt);		
+				rebalanceInsertRec(node.parent, cnt);		
 			case 2:
 				rotate(node,false);
 				node.right.rank -- ;
@@ -248,29 +182,30 @@ public int delete(int k)
 		return 0;	
 	}//end of recursive rebalance helper func
 		
-	
-	private int Case(WAVLNode node){
+//------------------------------------InsertCasesFunction----------------------------------------------
+
+	private int caseInsrt(WAVLNode node){
 		WAVLNode parent = node.parent;
-		if (RankLeft(parent)==0 && RankRight(parent)==1){
+		if (rankLeft(parent)==0 && rankRight(parent)==1){
 			return 1;
 		}
-		else if (RankLeft(parent)==1 && RankRight(parent)==0){ //mirror image of case 1
+		else if (rankLeft(parent)==1 && rankRight(parent)==0){ //mirror image of case 1
 			return 1; 
 		}
 		else { // final rebalances
-			if (RankRight(parent)==2){
-				if (RankRight(node) == 2){
+			if (rankRight(parent)==2){
+				if (rankRight(node) == 2){
 					return 2;
 				}
-				else if(RankLeft(node) == 2){
+				else if(rankLeft(node) == 2){
 					return 3;
 				}
 			}
-			else if (RankLeft(parent)==2){ //mirror images
-				if (RankRight(node) == 2){
+			else if (rankLeft(parent)==2){ //mirror images
+				if (rankRight(node) == 2){
 					return 6; // mirror image of 3
 				}
-				else if(RankLeft(node) == 2){
+				else if(rankLeft(node) == 2){
 					return 5; //mirror image of 2
 				}
 			}	
@@ -316,32 +251,189 @@ public int delete(int k)
 		bTemp.parent = zParent; 
 	}//end of rotate right helper func
 	
+
 	
-	
-	private int RankRight(WAVLNode node){ //input is parent node (no leaves)
+
+//------------------------------------DeleteTreeNode----------------------------------------------
+
+ /**
+  * public int delete(int k)
+  *
+  * deletes an item with key k from the binary tree, if it is there;
+  * the tree must remain valid (keep its invariants).
+  * returns the number of rebalancing operations, or 0 if no rebalancing operations were needed.
+  * returns -1 if an item with key k was not found in the tree.
+  */
+public int delete(int k)
+{
+	   WAVLNode cur = searchNode(k);		//searching for the right node
+	   if (cur ==null){
+		   return -1;
+	   }
+	   rebalanceInsert(cur);				//time to rebalance tree
+	   return -1;
+}
+
+
+//------------------------------------DeleteRebalance---------------------------------------
+
+	private int rebalanceDelete(WAVLNode node){
+		
+		WAVLNode parent = node.parent;
+		if (node.rank==0){				//condition for a leaf
+			if (rankRight(parent)==1 && rankLeft(parent)==1){	//leaf in 1-1 parent
+				removeLeaf(node);
+				return 0;
+			}
+			else {
+				if ((isLeft(node)&& parent.right==null)||(!isLeft(node)&&parent.left==null)){  //leaf in 1-2 parent and other child missing
+					parent.rank--;
+					removeLeaf(node);
+					//rebalanceDeleteRec(parent,1);			//calling to rebalance
+				}			
+				else{
+					removeLeaf(node);
+					//rebalnceDeleteRec(parent,0);
+				}
+			}
+		}
+		else if(node.left != null && node.right != null){ //binary node (deal with later!!!!!!!!!)
+			
+			
+			//find succssor or predesseccor
+			//replace infor
+			//delete predeseccor/succssor
+			
+			
+		}
+		else{										//unary case
+			WAVLNode child;
+			if(node.left==null){
+				child = node.right;						//checking the child side
+			}
+			else{
+				child = node.left;
+			}
+			
+			if(rankLeft(parent) == 1 && rankRight(parent) ==1){    //node has 1-1 parent
+				replaceUnari(node, child);
+				return 0;
+			}
+			else{
+				if((isLeft(node)&& rankLeft(parent)==1) ||(!isLeft(node)&& rankRight(parent)==1)){ 		//node has 1-rank difference of parent
+					replaceUnari(node,child);
+					return 0;
+				}
+				else{					//node has 2-rank difference of his parent
+					replaceUnari(node, child){
+						//return rebalance(parent,0);
+					}
+				}
+			}
+		}
+		return 0;			//in other cases
+	}
+
+
+//------------------------------------Methods----------------------------------------------
+//------------------------------------RankRight----------------------------------------------
+
+
+	private int rankRight(WAVLNode node){ //input is parent node (no leaves)
 		if (node.right == null){ //is a "-1" node
-			return 2;
+			return node.rank+1;
 		}
 		return Math.abs(node.rank-node.right.rank);
 	}//end of right rank checker helper func
-	
-	private int RankLeft(WAVLNode node){ //input is parent node (no leaves)
+
+//------------------------------------RankLeft----------------------------------------------
+
+	private int rankLeft(WAVLNode node){ //input is parent node (no leaves)
 		if (node.left == null){ //is a "-1" node
-			return 2; 
+			return node.rank+1; 
 		}
 		return Math.abs(node.rank-node.left.rank);
 	}// end of left rank checker helper func
-		
-	
-  /**
-   * public String min()
-   *
-   * Returns the iîfo of the item with the smallest key in the tree,
-   * or null if the tree is empty
-   */
 
+	
+//------------------------------------DeleteMethods----------------------------------------------
+	private void removeLeaf(WAVLNode node){
+		WAVLNode parent = node.parent;
+		if(isLeft(node)){
+			parent.left=null;	
+		}
+		else {
+			parent.right=null;
+		}
+		node.parent=null;
+		this.size--;
+	}
+	
+	private void replaceUnari(WAVLNode node, WAVLNode next){
+		WAVLNode parent = node.parent;
+		if(isLeft(node)){
+			parent.left = next;
+		}
+		else{
+			parent.right = next;
+		}
+		next.parent = parent;
+		this.size--;	
+	}
+	
+	private WAVLNode findPre(WAVLNode node){			//only for binari node
+		
+	}
+	
+	
+//------------------------------------whatKindofSon----------------------------------------------
+	
+	private boolean isLeft(WAVLNode node){			//Am I the Left child of my parent?
+		WAVLNode parent = node.parent;
+		if(parent.left==null){
+			return false;	
+		}
+		else if(parent.left==node){
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+//------------------------------------NodeSearch----------------------------------------------
+
+
+	public WAVLNode searchNode(int k){
+		WAVLNode cur = this.root;
+		while(cur !=null){
+			int key = cur.key;
+			if (key==k){
+				return cur;
+			}
+			else if(key > k){
+				cur = cur.left;
+			}
+			else{
+				cur = cur.right;
+			}
+		}
+		//if tree is empty or key not found
+		return null;
+	}
+
+
+
+//------------------------------------RestoftheCode----------------------------------------------
 
 //------------------------------------MinimumValue----------------------------------------------
+
+/**
+ * public String min()
+ *
+ * Returns the iîfo of the item with the smallest key in the tree,
+ * or null if the tree is empty
+ */
 
 public String min()
 {
@@ -519,8 +611,8 @@ public String max()
 	  if(node == null){
 		  return true;
 	  }
-	  if((RankLeft(node) == 1 && RankRight(node) ==2)  || (RankLeft(node) == 2 && RankRight(node) ==1) || 
-			  (RankLeft(node) == 1 && RankRight(node) ==1) || (RankLeft(node) == 2 && RankRight(node) ==2)){
+	  if((rankLeft(node) == 1 && rankRight(node) ==2)  || (rankLeft(node) == 2 && rankRight(node) ==1) || 
+			  (rankLeft(node) == 1 && rankRight(node) ==1) || (rankLeft(node) == 2 && rankRight(node) ==2)){
 		  return (isWAVL(node.left) && isWAVL(node.right));
 	  }
 	  return false;
