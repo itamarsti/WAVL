@@ -155,7 +155,7 @@ public int insert(int k, String i) {
 			case 1:
 				node.parent.rank ++;				//promote parent and continue rebalancing
 				cnt++;
-				rebalanceInsertRec(node.parent, cnt);		
+				return rebalanceInsertRec(node.parent, cnt);		
 			case 2:
 				rotate(node,false);
 				node.right.rank -- ;
@@ -167,7 +167,7 @@ public int insert(int k, String i) {
 				node.parent.rank ++ ;
 				node.parent.right.rank -- ;
 				return cnt + 5;
-			case 5:
+			case 5: //**********************maybe more ranks should be changed, like in case 3 delete********
 				rotate(node,true);
 				node.left.rank --;
 				return cnt+2;
@@ -270,8 +270,7 @@ public int delete(int k)
 	   if (cur ==null){
 		   return -1;
 	   }
-	   rebalanceInsert(cur);				//time to rebalance tree
-	   return -1;
+	   return rebalanceDelete(cur);				//time to rebalance tree
 }
 
 
@@ -289,24 +288,24 @@ public int delete(int k)
 				if ((isLeft(node)&& parent.right==null)||(!isLeft(node)&&parent.left==null)){  //leaf in 1-2 parent and other child missing
 					parent.rank--;
 					removeLeaf(node);
-					//rebalanceDeleteRec(parent,1);			//calling to rebalance
+					return rebalanceDeleteRec(parent,1);			//calling to rebalance
 				}			
 				else{
 					removeLeaf(node);
-					//rebalnceDeleteRec(parent,0);
+					return rebalanceDeleteRec(parent,0);
 				}
 			}
 		}
-		else if(node.left != null && node.right != null){ //binary node (deal with later!!!!!!!!!)
+		else if(node.left != null && node.right != null){                 //binary node 
 			
-			
-			//find succssor or predesseccor
-			//replace infor
-			//delete predeseccor/succssor
-			
-			
+			WAVLNode tmp = findSuc(node);
+			node.key = tmp.key;
+			node.info = tmp.info;
+			WAVLNode tmpParent = tmp.parent;
+			removeLeaf(tmp);
+			return rebalanceDeleteRec(tmpParent, 0);
 		}
-		else{										//unary case
+		else{										                  //unary case
 			WAVLNode child;
 			if(node.left==null){
 				child = node.right;						//checking the child side
@@ -325,17 +324,120 @@ public int delete(int k)
 					return 0;
 				}
 				else{					//node has 2-rank difference of his parent
-					replaceUnari(node, child){
-						//return rebalance(parent,0);
+					replaceUnari(node, child);
+					return rebalanceDeleteRec(parent,0);
 					}
 				}
 			}
+
 		}
-		return 0;			//in other cases
+					
+	
+	private int rebalanceDeleteRec(WAVLNode node, int cnt){
+		//start, case, deal with it
+		WAVLNode parent = node.parent;
+		if (node == null){
+			return cnt;
+		}
+		int Case = caseDelete(node);
+		switch (Case){
+			case 1:
+				node.rank--;
+				cnt++;
+				return rebalanceDeleteRec(parent,cnt);
+			case 2: //check which side child is on
+				node.rank--;
+				if (rankRight(node)==1){
+					node.right.rank--;
+				}
+				else{
+					node.left.rank--;
+				}
+				cnt+= 2;
+				return rebalanceDeleteRec(parent, cnt);
+			case 3:
+				rotate(node.right,true); //rotate left
+				node.rank--;
+				node.right.rank--;
+				cnt += 2;
+				if(rankLeft(node) == 2 & rankRight(node) == 2){ //node is a 2-2 leaf
+					node.rank--;
+					cnt++;
+				}
+				return cnt;
+			
+			case 4:			//*****to ask to make sure demote -2 is 2 actions
+				WAVLNode temp = node.right.left;	//keeping pointer to the demand node
+				rotate(temp,false);		//rotate right
+				rotate(temp,true);		//rotate left
+				node.rank -= 2;
+				temp.rank++;
+				temp.right.rank--;
+				cnt+= 6;
+				return rebalanceDeleteRec(temp.parent, cnt);
+				
+			case 6:							//symertric case of 3
+				rotate(node.left,false);		//rotate right
+				node.rank--;
+				node.left.rank--;
+				cnt += 2;
+				if(rankLeft(node) == 2 & rankRight(node) == 2){ //node is a 2-2 leaf
+					node.rank--;
+					cnt++;
+				}
+				return cnt;
+			
+			case 8:			//symertric of 4
+				//*****to ask to make sure demote -2 is 2 actions
+				WAVLNode temp8 = node.right.left;	//keeping pointer to the demand node
+				rotate(temp8,true);		//rotate left
+				rotate(temp8,false);		//rotate right
+				node.rank -= 2;
+				temp8.rank++;
+				temp8.left.rank--;
+				cnt+= 6;
+				return rebalanceDeleteRec(temp8.parent, cnt);			
+		}
+		return cnt;		//other cases
 	}
+	
+	private int caseDelete(WAVLNode node){
+		if((rankLeft(node) == 3 ) ||  rankRight(node) == 3){
+			if (rankRight(node) == 2 || rankLeft(node) == 2){
+			return 1 ;
+			}
+			else{
+				WAVLNode child;
+				if (rankLeft(node) == 3){
+					child = node.right;   //assert child!=null
+				}
+				else{
+					child = node.left; //assert child!=null
+				}
+				if(rankLeft(child) == 2 && rankRight(child) == 2){
+					return 2;
+				}
+				else if(!isLeft(child) && rankRight(child) == 2){
+					return 4;
+				}
+				else if(isLeft(child) && rankLeft(child) ==2 ){ //symetric case of 4
+					return 8;
+				}
+				else if(!isLeft(child) && rankRight(child) == 1){
+					return 3;
+				}
+				else if(isLeft(child) && rankLeft(child) ==1){ //symetric of 3
+					return 6;
+				}
+				
+			}
+		}
+		return 0;		
+	}
+ 
 
 
-//------------------------------------Methods----------------------------------------------
+//------------------------------------GeneralMethods----------------------------------------------
 //------------------------------------RankRight----------------------------------------------
 
 
@@ -355,39 +457,8 @@ public int delete(int k)
 		return Math.abs(node.rank-node.left.rank);
 	}// end of left rank checker helper func
 
-	
-//------------------------------------DeleteMethods----------------------------------------------
-	private void removeLeaf(WAVLNode node){
-		WAVLNode parent = node.parent;
-		if(isLeft(node)){
-			parent.left=null;	
-		}
-		else {
-			parent.right=null;
-		}
-		node.parent=null;
-		this.size--;
-	}
-	
-	private void replaceUnari(WAVLNode node, WAVLNode next){
-		WAVLNode parent = node.parent;
-		if(isLeft(node)){
-			parent.left = next;
-		}
-		else{
-			parent.right = next;
-		}
-		next.parent = parent;
-		this.size--;	
-	}
-	
-	private WAVLNode findPre(WAVLNode node){			//only for binari node
-		
-	}
-	
-	
-//------------------------------------whatKindofSon----------------------------------------------
-	
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~whatKindofSon~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\\
+
 	private boolean isLeft(WAVLNode node){			//Am I the Left child of my parent?
 		WAVLNode parent = node.parent;
 		if(parent.left==null){
@@ -401,7 +472,54 @@ public int delete(int k)
 		}
 	}
 	
-//------------------------------------NodeSearch----------------------------------------------
+//------------------------------------DeleteMethods----------------------------------------------\\
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RemoveLeaf~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\\
+
+	private void removeLeaf(WAVLNode node){
+		WAVLNode parent = node.parent;
+		if(isLeft(node)){
+			parent.left=null;	
+		}
+		else {
+			parent.right=null;
+		}
+		node.parent=null;
+		this.size--;
+	}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ReplaceUnariNode~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\\
+
+	private void replaceUnari(WAVLNode node, WAVLNode next){
+		WAVLNode parent = node.parent;
+		if(isLeft(node)){
+			parent.left = next;
+		}
+		else{
+			parent.right = next;
+		}
+		next.parent = parent;
+		this.size--;	
+	}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~FindingSuccesor And Predeseccor~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\\
+
+	private WAVLNode findSuc(WAVLNode node){			//only for binari node
+		WAVLNode cur = node.right;
+		while (cur.left != null){
+			cur = cur.left;
+		}
+		return cur; 
+	}
+	
+	private WAVLNode findPr(WAVLNode node){			//only for binari node
+		WAVLNode cur = node.left;
+		while (cur.right != null){
+			cur = cur.right;
+		}
+		return cur; 
+	}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~NodeSearch~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\\
 
 
 	public WAVLNode searchNode(int k){
@@ -567,6 +685,7 @@ public String max()
 	  }
  }
  
+ 
 //------------------------------------MainFunction----------------------------------------------
 
   public static void main (String[] args){
@@ -578,7 +697,7 @@ public String max()
 	  System.out.println(yosi.info);
 	  System.out.println(yosi.rank);
 	  System.out.println(tree.root);
-	  **/
+	  
 	  
 	  WAVLTree b = new WAVLTree();
 		Random rand = new Random();
@@ -606,17 +725,19 @@ public String max()
 		}
 		System.out.println("yeah");		
 		}
-  
+/**  
   public boolean isWAVL(WAVLNode node){
 	  if(node == null){
 		  return true;
 	  }
-	  if((rankLeft(node) == 1 && rankRight(node) ==2)  || (rankLeft(node) == 2 && rankRight(node) ==1) || 
-			  (rankLeft(node) == 1 && rankRight(node) ==1) || (rankLeft(node) == 2 && rankRight(node) ==2)){
+	  if((RankLeft(node) == 1 && RankRight(node) ==2)  || (RankLeft(node) == 2 && RankRight(node) ==1) || 
+			  (RankLeft(node) == 1 && RankRight(node) ==1) || (RankLeft(node) == 2 && RankRight(node) ==2)){
 		  return (isWAVL(node.left) && isWAVL(node.right));
 	  }
 	  return false;
   }
+**/
+}}
 
-}
-  
+
+
