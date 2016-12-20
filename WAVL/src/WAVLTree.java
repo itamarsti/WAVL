@@ -278,7 +278,7 @@ public int delete(int k)
 		   return -1;
 	   }
 	   
-	   if(cur==this.minode){
+	   if(cur==this.minode){			//*******considering swaping or insert to rebalance
 		   this.minode = cur.parent;
 	   }
 	   if(cur==this.maxnode){
@@ -292,6 +292,14 @@ public int delete(int k)
 
 	private int rebalanceDelete(WAVLNode node){
 		
+		int cnt = 0;
+		if (node==this.root && node.right==null && node.left==null){	//only root in tree
+			this.maxnode = null;
+			this.minode = null;
+			this.root = null;
+			this.size--;
+			return cnt;
+		}
 		WAVLNode parent = node.parent;
 		if (node.rank==0){				//condition for a leaf
 			if (rankRight(parent)==1 && rankLeft(parent)==1){	//leaf in 1-1 parent
@@ -302,22 +310,27 @@ public int delete(int k)
 				if ((isLeft(node)&& parent.right==null)||(!isLeft(node)&&parent.left==null)){  //leaf in 1-2 parent and other child missing
 					parent.rank--;
 					removeLeaf(node);
-					return rebalanceDeleteRec(parent,1);			//calling to rebalance
+					cnt++;
+					return rebalanceDeleteRec(parent,cnt);			//calling to rebalance
 				}			
 				else{
 					removeLeaf(node);
-					return rebalanceDeleteRec(parent,0);
+					return rebalanceDeleteRec(parent,cnt);
 				}
 			}
 		}
 		else if(node.left != null && node.right != null){                 //binary node 
-			
+																		//to check root case
 			WAVLNode tmp = findSuc(node);
 			node.key = tmp.key;
 			node.info = tmp.info;
 			WAVLNode tmpParent = tmp.parent;
+			if (this.maxnode == tmp){
+				this.maxnode = node;
+			}
 			removeLeaf(tmp);
-			return rebalanceDeleteRec(tmpParent, 0);
+			
+			return rebalanceDeleteRec(tmpParent, cnt);
 		}
 		else{										                  //unary case
 			WAVLNode child;
@@ -327,19 +340,27 @@ public int delete(int k)
 			else{
 				child = node.left;
 			}
+			if (node == this.root && node.rank==1){			//delete unary root
+				this.root = child;
+				this.minode = child;
+				this.maxnode = child;
+				child.parent = null;
+				this.size--;
+				return cnt;
+			}
 			
 			if(rankLeft(parent) == 1 && rankRight(parent) ==1){    //node has 1-1 parent
 				replaceUnari(node, child);
-				return 0;
+				return cnt;
 			}
 			else{
 				if((isLeft(node)&& rankLeft(parent)==1) ||(!isLeft(node)&& rankRight(parent)==1)){ 		//node has 1-rank difference of parent
 					replaceUnari(node,child);
-					return 0;
+					return cnt;
 				}
 				else{					//node has 2-rank difference of his parent
 					replaceUnari(node, child);
-					return rebalanceDeleteRec(parent,0);
+					return rebalanceDeleteRec(parent,cnt);
 					}
 				}
 			}
@@ -350,6 +371,9 @@ public int delete(int k)
 	private int rebalanceDeleteRec(WAVLNode node, int cnt){
 		//start, case, deal with it
 		if (node == null){
+			return cnt;
+		}
+		if (node == this.root){
 			return cnt;
 		}
 		WAVLNode parent = node.parent;
@@ -716,22 +740,24 @@ public String max()
 	  
 	  WAVLTree b = new WAVLTree();
 		Random rand = new Random();
-		//String s="";
+		String s="";
 		for (int i=0;i<100000;i++)
 		{
-			//System.out.print(i);	
+			System.out.println(i);	
 			b = new WAVLTree();
-			//s="";
-			int k=1+rand.nextInt(999999);
+			s="";
+			int k=1+rand.nextInt(10000);
 			for(int j=0;j<k;j++){
 				int n=rand.nextInt(Integer.MAX_VALUE);
-				//s+=(Integer.toString(n)+" ");
+				s+=(Integer.toString(n)+" ");
 				b.insert(n, "");
 			}
 			if(b.isWAVL(b.root)){
-				//System.out.println("tree number: "+i+" is WAVL"+"has "+k+" nodes");
-				//System.out.println(s);
+				if (i%1000==0){
+					System.out.println("tree number: "+i+" is WAVL"+"has "+k+" nodes");
+					System.out.println(s);
 				}
+			}
 			else{
 				System.out.println("tree number: "+i+" is NOT WAVL"+"has "+k+" nodes");
 				return;
