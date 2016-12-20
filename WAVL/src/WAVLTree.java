@@ -455,7 +455,7 @@ public int delete(int k)
 //------------------------------------RankRight----------------------------------------------
 
 
-	private int rankRight(WAVLNode node){ //input is parent node (no leaves)
+	private static int rankRight(WAVLNode node){ //input is parent node (no leaves)
 		if (node.right == null){ //is a "-1" node
 			return node.rank+1;
 		}
@@ -464,7 +464,7 @@ public int delete(int k)
 
 //------------------------------------RankLeft----------------------------------------------
 
-	private int rankLeft(WAVLNode node){ //input is parent node (no leaves)
+	private static int rankLeft(WAVLNode node){ //input is parent node (no leaves)
 		if (node.left == null){ //is a "-1" node
 			return node.rank+1; 
 		}
@@ -703,13 +703,8 @@ public String max()
 //------------------------------------MainFunction----------------------------------------------
 
   public static void main (String[] args){
-	  
-	  WAVLTree tree = new WAVLTree();
-	  tree.insert(50, "");
-	  tree.insert(40, "");
-	  tree.insert(30, "");
+	
 
-	  /**
 	  WAVLTree tree = new WAVLTree();
 	  WAVLNode yosi =tree.new WAVLNode(1, "2"); 
 	  yosi.rank = -1;
@@ -722,19 +717,19 @@ public String max()
 	  WAVLTree b = new WAVLTree();
 		Random rand = new Random();
 		//String s="";
-		for (int i=0;i<5000;i++)
+		for (int i=0;i<100000;i++)
 		{
 			//System.out.print(i);	
 			b = new WAVLTree();
 			//s="";
-			int k=1+rand.nextInt(99999);
+			int k=1+rand.nextInt(999999);
 			for(int j=0;j<k;j++){
 				int n=rand.nextInt(Integer.MAX_VALUE);
 				//s+=(Integer.toString(n)+" ");
 				b.insert(n, "");
 			}
 			if(b.isWAVL(b.root)){
-				System.out.println("tree number: "+i+" is WAVL"+"has "+k+" nodes");
+				//System.out.println("tree number: "+i+" is WAVL"+"has "+k+" nodes");
 				//System.out.println(s);
 				}
 			else{
@@ -744,20 +739,22 @@ public String max()
 			}
 		}
 		System.out.println("yeah");		
-		}
-/**  
-  public boolean isWAVL(WAVLNode node){
-	  if(node == null){
-		  return true;
-	  }
-	  if((RankLeft(node) == 1 && RankRight(node) ==2)  || (RankLeft(node) == 2 && RankRight(node) ==1) || 
-			  (RankLeft(node) == 1 && RankRight(node) ==1) || (RankLeft(node) == 2 && RankRight(node) ==2)){
-		  return (isWAVL(node.left) && isWAVL(node.right));
-	  }
-	  return false;
   }
-**/
-}}
+		
+ 
+
+	public static boolean isWAVL(WAVLNode node){
+		  if(node == null){
+			  return true;
+		  }
+		  if((rankLeft(node) == 1 && rankRight(node) ==2)  || (rankLeft(node) == 2 && rankRight(node) ==1) || 
+				  (rankLeft(node) == 1 && rankRight(node) ==1) || (rankLeft(node) == 2 && rankRight(node) ==2)){
+			  return (isWAVL(node.left) && isWAVL(node.right));
+		  }
+		  return false;
+	}
+}
+ 
 
 
 
