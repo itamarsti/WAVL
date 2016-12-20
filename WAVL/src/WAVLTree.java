@@ -132,10 +132,8 @@ public int insert(int k, String i) {
 			}
 		else{										//if Case A: both node.parent kids were null
 			parent.rank ++;
-			cnt++;
-			//if case 1....
-			cnt = rebalanceInsertRec(parent, 0); //recursive rebalancing calls (calls helper func)
-			//if case 2
+			cnt++;									//cnt == 1
+			cnt = rebalanceInsertRec(parent, cnt); //recursive rebalancing calls (calls helper func)
 		}
 		
   return cnt;
@@ -161,22 +159,24 @@ public int insert(int k, String i) {
 				node.right.rank -- ;
 				return cnt + 2;
 			case 3:
-				rotate(node.right,true);
-				rotate(node.parent,false);
+				WAVLNode chuck = node.right; //in presentation chuck = B
+				rotate(chuck,true);
+				rotate(chuck,false);
 				node.rank --;
-				node.parent.rank ++ ;
-				node.parent.right.rank -- ;
+				chuck.rank ++ ;
+				chuck.right.rank -- ;
 				return cnt + 5;
 			case 5: //**********************maybe more ranks should be changed, like in case 3 delete********
 				rotate(node,true);
 				node.left.rank --;
 				return cnt+2;
 			case 6:	
-				rotate(node.left,false);
-				rotate(node.parent,true);
+				WAVLNode norris = node.left; //in presentation norris = B
+				rotate(norris,false);
+				rotate(norris,true);
 				node.rank -- ;
-				node.parent.rank ++ ;
-				node.parent.left.rank -- ;
+				norris.rank ++ ;
+				norris.left.rank -- ;
 				return cnt + 5; 
 		}
 		return 0;	
@@ -222,37 +222,44 @@ public int insert(int k, String i) {
 		//----------------------------------------//
 		WAVLNode zParent = node.parent;
 		WAVLNode grandParent = node.parent.parent;
-		//connect x parent to be x right child
+		//connect node parent to be node right child
 		if (left){
 			node.left = zParent;
 		}
 		else{
 			node.right = zParent;
 		}
-		//connect grandparent of x to x
-		if(grandParent.left == zParent){  //if z is left child
-			grandParent.left = node;
+		if (grandParent != null){
+			//connect grandparent of node to node
+			if(grandParent.left == zParent){  //if node.parent is left child
+				grandParent.left = node;
+			}
+			else {
+				grandParent.right = node;
+			}
+			//connect node to its grandparent
+			node.parent = grandParent;
 		}
-		else {
-			grandParent.right = node;
+		else{
+			this.root = node;
+			node.parent = null;
 		}
-		//connect x to its grandparent
-		node.parent = grandParent;
-		//connect x new child to x
+		//connect node new child to node
 		zParent.parent = node;
-		//connect x child to grandson
+		//connect node child to grandson
 		if (left){
 			zParent.right = bTemp;
 		}
 		else{
 			zParent.left = bTemp;
 		}
-		//connect x grandson to child
-		bTemp.parent = zParent; 
+		if (bTemp!=null){
+			//connect node grandson to child
+			bTemp.parent = zParent; 
+		}
 	}//end of rotate right helper func
 	
 
-	
 
 //------------------------------------DeleteTreeNode----------------------------------------------
 
@@ -269,6 +276,13 @@ public int delete(int k)
 	   WAVLNode cur = searchNode(k);		//searching for the right node
 	   if (cur ==null){
 		   return -1;
+	   }
+	   
+	   if(cur==this.minode){
+		   this.minode = cur.parent;
+	   }
+	   if(cur==this.maxnode){
+		   this.maxnode =cur.parent;
 	   }
 	   return rebalanceDelete(cur);				//time to rebalance tree
 }
@@ -335,10 +349,10 @@ public int delete(int k)
 	
 	private int rebalanceDeleteRec(WAVLNode node, int cnt){
 		//start, case, deal with it
-		WAVLNode parent = node.parent;
 		if (node == null){
 			return cnt;
 		}
+		WAVLNode parent = node.parent;
 		int Case = caseDelete(node);
 		switch (Case){
 			case 1:
@@ -511,7 +525,7 @@ public int delete(int k)
 		return cur; 
 	}
 	
-	private WAVLNode findPr(WAVLNode node){			//only for binari node
+	private WAVLNode findPre(WAVLNode node){			//only for binari node
 		WAVLNode cur = node.left;
 		while (cur.right != null){
 			cur = cur.right;
@@ -689,6 +703,12 @@ public String max()
 //------------------------------------MainFunction----------------------------------------------
 
   public static void main (String[] args){
+	  
+	  WAVLTree tree = new WAVLTree();
+	  tree.insert(50, "");
+	  tree.insert(40, "");
+	  tree.insert(30, "");
+
 	  /**
 	  WAVLTree tree = new WAVLTree();
 	  WAVLNode yosi =tree.new WAVLNode(1, "2"); 
