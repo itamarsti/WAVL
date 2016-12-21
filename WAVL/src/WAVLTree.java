@@ -1,12 +1,3 @@
-/**
-*
-* WAVLTree
-*
-* An implementation of a WAVL Tree with
-* distinct integer keys and info
-*
-*/
-
 import java.util.Random;           ////////////////////only for tests////////////////
 
 //-------------------------------------------WAVLTree Class Builders-----------------------------------
@@ -213,13 +204,11 @@ public int insert(int k, String i) {
 		return 0 ; //tree is legal (parent had rank diff of 2 before rebalancing)
 	}// end of case checker helper func
 	
-	private void rotate(WAVLNode node,boolean left){
-		//----------------------------------------//
+	private void rotate(WAVLNode node,boolean left){ //rotate right unless left == true
 		WAVLNode bTemp = node.right;
 		if (left){						
 			 bTemp = node.left;
 		}
-		//----------------------------------------//
 		WAVLNode zParent = node.parent;
 		WAVLNode grandParent = node.parent.parent;
 		//connect node parent to be node right child
@@ -279,10 +268,20 @@ public int delete(int k)
 	   }
 	   
 	   if(cur==this.minode){			//*******considering swaping or insert to rebalance
-		   this.minode = cur.parent;
+		  if(cur.right == null){
+			  this.minode = cur.parent;
+		  }
+		  else{
+			  this.minode = findSuc(cur);
+		  }
 	   }
 	   if(cur==this.maxnode){
-		   this.maxnode =cur.parent;
+		   if(cur.left == null){
+				  this.maxnode = cur.parent;
+			  }
+			  else{
+				  this.maxnode = findPre(cur);
+			  }
 	   }
 	   return rebalanceDelete(cur);				//time to rebalance tree
 }
@@ -311,7 +310,7 @@ public int delete(int k)
 					parent.rank--;
 					removeLeaf(node);
 					cnt++;
-					return rebalanceDeleteRec(parent,cnt);			//calling to rebalance
+					return rebalanceDeleteRec(parent.parent ,cnt);			//calling to rebalance
 				}			
 				else{
 					removeLeaf(node);
@@ -329,7 +328,6 @@ public int delete(int k)
 				this.maxnode = node;
 			}
 			removeLeaf(tmp);
-			
 			return rebalanceDeleteRec(tmpParent, cnt);
 		}
 		else{										                  //unary case
@@ -369,11 +367,7 @@ public int delete(int k)
 					
 	
 	private int rebalanceDeleteRec(WAVLNode node, int cnt){
-		//start, case, deal with it
-		if (node == null){
-			return cnt;
-		}
-		if (node == this.root){
+		if (node == null){ //halting condition
 			return cnt;
 		}
 		WAVLNode parent = node.parent;
@@ -384,21 +378,21 @@ public int delete(int k)
 				cnt++;
 				return rebalanceDeleteRec(parent,cnt);
 			case 2: //check which side child is on
-				node.rank--;
 				if (rankRight(node)==1){
 					node.right.rank--;
 				}
 				else{
 					node.left.rank--;
 				}
+				node.rank--;
 				cnt+= 2;
 				return rebalanceDeleteRec(parent, cnt);
 			case 3:
-				rotate(node.right,true); //rotate left
 				node.rank--;
-				node.right.rank--;
+				node.right.rank++; 		 //changing rank before rotate because node.right is different after rotate
+				rotate(node.right,true); //rotate left
 				cnt += 2;
-				if(rankLeft(node) == 2 & rankRight(node) == 2){ //node is a 2-2 leaf
+				if(rankLeft(node) == 2 && rankRight(node) == 2){ //node is a 2-2 leaf
 					node.rank--;
 					cnt++;
 				}
@@ -409,32 +403,32 @@ public int delete(int k)
 				rotate(temp,false);		//rotate right
 				rotate(temp,true);		//rotate left
 				node.rank -= 2;
-				temp.rank++;
-				temp.right.rank--;
-				cnt+= 6;
-				return rebalanceDeleteRec(temp.parent, cnt);
+				temp.rank += 2;
+				temp.right.rank--;  //should be after rotate
+				cnt+= 7;
+				return cnt;
 				
-			case 6:							//symertric case of 3
-				rotate(node.left,false);		//rotate right
+			case 13:							//symertric case of 3
 				node.rank--;
-				node.left.rank--;
+				node.left.rank++;			//changing rank before rotate because node.right is different after rotate
+				rotate(node.left,false);		//rotate right
 				cnt += 2;
-				if(rankLeft(node) == 2 & rankRight(node) == 2){ //node is a 2-2 leaf
+				if(rankLeft(node) == 2 && rankRight(node) == 2){ //node is a 2-2 leaf
 					node.rank--;
 					cnt++;
 				}
 				return cnt;
 			
-			case 8:			//symertric of 4
+			case 14:			//symertric of 4
 				//*****to ask to make sure demote -2 is 2 actions
-				WAVLNode temp8 = node.right.left;	//keeping pointer to the demand node
-				rotate(temp8,true);		//rotate left
-				rotate(temp8,false);		//rotate right
+				WAVLNode temp14 = node.left.right;	//keeping pointer to the demand node
+				rotate(temp14,true);		//rotate left
+				rotate(temp14,false);		//rotate right
 				node.rank -= 2;
-				temp8.rank++;
-				temp8.left.rank--;
-				cnt+= 6;
-				return rebalanceDeleteRec(temp8.parent, cnt);			
+				temp14.rank += 2;
+				temp14.left.rank--; //should be after rotate
+				cnt+= 7;
+				return cnt;			
 		}
 		return cnt;		//other cases
 	}
@@ -455,22 +449,21 @@ public int delete(int k)
 				if(rankLeft(child) == 2 && rankRight(child) == 2){
 					return 2;
 				}
-				else if(!isLeft(child) && rankRight(child) == 2){
-					return 4;
-				}
-				else if(isLeft(child) && rankLeft(child) ==2 ){ //symetric case of 4
-					return 8;
-				}
 				else if(!isLeft(child) && rankRight(child) == 1){
 					return 3;
 				}
 				else if(isLeft(child) && rankLeft(child) ==1){ //symetric of 3
-					return 6;
+					return 13;
 				}
-				
+				else if(!isLeft(child) && rankRight(child) == 2){
+					return 4;
+				}
+				else if(isLeft(child) && rankLeft(child) ==2 ){ //symetric case of 4
+					return 14;
+				}	
 			}
 		}
-		return 0;		
+		return 0;		//no problems found
 	}
  
 
@@ -639,7 +632,6 @@ public String max()
   * Returns an array which contains all info in the tree,
   * sorted by their respective keys,
   * or an empty array if the tree is empty.
-
   */
  public String[] infoToArray(){
        String[] arr = new String[this.size];
@@ -780,7 +772,3 @@ public String max()
 		  return false;
 	}
 }
- 
-
-
-
