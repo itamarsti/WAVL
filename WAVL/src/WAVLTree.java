@@ -188,7 +188,7 @@ public int insert(int k, String i) {
 			return 1; 
 		}
 		else { // final rebalances
-			if (rankRight(parent)==2){
+			if ((rankRight(parent)==2)&&(rankLeft(parent)==0)){
 				if (rankRight(node) == 2){
 					return 2;
 				}
@@ -196,7 +196,7 @@ public int insert(int k, String i) {
 					return 3;
 				}
 			}
-			else if (rankLeft(parent)==2){ //mirror images
+			else if ((rankLeft(parent)==2) && (rankRight(parent)==0)){ //mirror images
 				if (rankRight(node) == 2){
 					return 6; // mirror image of 3
 				}
@@ -754,14 +754,14 @@ public String max()
 		Random rand = new Random();
 		String s="";
 		
-		for (int i=0;i<100;i++) //tree amount
+		for (int i=0;i<100000;i++) //tree amount
 		{
-			int minisert = 5;
-			int maxkey = 100;
-			int actions = 7;
+			int minisert = 0;
+			int maxkey = 30000;
+			int actions = 5000;
 			
 			b = new WAVLTree();			
-			int k=4+rand.nextInt(actions); //action amount
+			int k=minisert+rand.nextInt(actions); //action amount
 			
 			List<Integer> list = new ArrayList<Integer>();
 			for(int j=0;j<k;j++){        //each action
