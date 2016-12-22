@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;           ////////////////////only for tests////////////////
@@ -346,7 +347,6 @@ public int delete(int k)
 			WAVLNode tmp = findSuc(node);
 			node.key = tmp.key;
 			node.info = tmp.info;
-			WAVLNode tmpParent = tmp.parent;
 			if (this.maxnode == tmp){
 				this.maxnode = node;
 			}
@@ -641,17 +641,27 @@ public String max()
   * Returns a sorted array which contains all keys in the tree,
   * or an empty array if the tree is empty.
   */
- public int[] keysToArray()
- {
-       int[] arr = new int[this.size];
-       String final_str = "";
-       final_str = this.root.keyToString(this.root, final_str);
-       String[] str_arr = final_str.split(" ");
-       for (int i=0; i<arr.length;i++){
-       	arr[i] = Integer.parseInt(str_arr[i]);
-       }
-       return arr;             
+ public int[] keysToArray(){
+	 int[] arr = new int[this.size];
+	 int index;
+     index = keysArrayRec(this.root, arr,0);
+     return arr;             
  }
+ 
+//------------------------------------KeysToArrayRec------------------------------------------//
+ 
+
+public int keysArrayRec(WAVLNode node, int[] arr_rec, int index){
+	 if (node == null){
+		 return index;
+	 }
+	 index = keysArrayRec(node.left, arr_rec,index);
+	 arr_rec[index] = node.key;
+	 index++;
+	 index = keysArrayRec(node.right, arr_rec,index);
+	 return index;
+}
+
 
 //------------------------------------InfoToArray----------------------------------------------
 
@@ -663,13 +673,28 @@ public String max()
   * or an empty array if the tree is empty.
   */
  public String[] infoToArray(){
-       String[] arr = new String[this.size];
-       String final_str = "";
-       final_str = this.root.infoToString(this.root, final_str);
-       return final_str.split(" ");                    
+	 String[] arr = new String[this.size];
+	 int index;
+     index = infoArrayRec(this.root, arr,0);
+     return arr;               
  }
+ 
+//------------------------------------infoToArrayRec------------------------------------------//
+ 
+
+public int infoArrayRec(WAVLNode node, String[] arr_rec, int index){
+	 if (node == null){
+		 return index;
+	 }
+	 index = infoArrayRec(node.left, arr_rec,index);
+	 arr_rec[index] = node.info;
+	 index++;
+	 index = infoArrayRec(node.right, arr_rec,index);
+	 return index;
+}
 
 
+//-------------------------------------------------------------------------------------\\
 
 /**
    * public int size()
@@ -712,53 +737,26 @@ public String max()
 		this.info = info;
 		
 	}
-
-//------------------------------------StringOfSortedKeys----------------------------------------------
-	  
-	  public String infoToString(WAVLNode node, String str){
-		  if (node.equals(null)){
-			  return str;			  
-		  }
-		  if (node.rank==0){
-			  str += node.info + " ";
-			  return str;
-		  }
-		  else{
-			  return infoToString(node.left, str)+node.info+ " "+infoToString(node.right, str);
-		  }	  
-	  }
-
-//------------------------------------StringOfSortedValues----------------------------------------------
-
-	  public String keyToString(WAVLNode node, String str){
-		  if (node.equals(null)){
-			  return str;			  
-		  }
-		  if (node.rank==0){
-			  str += node.key + " ";
-			  return str;
-		  }
-		  else{
-			  return infoToString(node.left, str)+node.key + " "+infoToString(node.right, str);
-		  }	  
-	  }
  }
+ //-----------------------------------------------------------------------------------------//
  
+
+
  
 //------------------------------------MainFunction----------------------------------------------
 
   public static void main (String[] args){
 	
-	  
+	 
 	  WAVLTree b = new WAVLTree();
 		Random rand = new Random();
 		String s="";
 		
-		for (int i=0;i<100000;i++) //tree amount
+		for (int i=0;i<1;i++) //tree amount
 		{
 			int minisert = 0;
 			int maxkey = 30000;
-			int actions = 5000;
+			int actions = 30;
 			
 			b = new WAVLTree();			
 			int k=minisert+rand.nextInt(actions); //action amount
@@ -806,6 +804,16 @@ public String max()
 				return;			
 			}
 		}
+		WAVLTree yourMother = new WAVLTree();
+		yourMother.insert(6, "");
+		yourMother.insert(7, "");
+		yourMother.insert(8, "");
+		yourMother.insert(9, "");
+		yourMother.insert(10, "");
+
+		System.out.println(Arrays.toString(b.infoToArray()));
+		System.out.println(Arrays.toString(b.keysToArray()));
+	
 		System.out.println("yeah");		
 	  }
 		
@@ -824,5 +832,5 @@ public String max()
 		  }
 		  return false;
 	}
-
-}
+	
+ }
