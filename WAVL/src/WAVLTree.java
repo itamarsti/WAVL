@@ -122,8 +122,7 @@ public int insert(int k, String i) {
 		node.rank = 0; //can delete later if new node default rank is 0
 		int cnt = 0;
 		WAVLNode parent = node.parent;
-		int pa_rank = parent.rank;
-		if (pa_rank==1){							//if Case B
+		if (parent.rank==1){							//if Case B
 			return cnt;
 			}
 		else{										//if Case A: both node.parent kids were null
