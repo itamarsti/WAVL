@@ -831,8 +831,12 @@ public String max()
 		System.out.println(avgDel);
 		System.out.println("maximum delete is "+max_del);
 		System.out.println("maximum insert is "+max_ins);
-		System.out.println("yeah");		
+		System.out.println("yeah");	
+		System.out.println(System.getProperty("java.runtime.version"));
+		
 	  }
+  
+  
 		
  
 
