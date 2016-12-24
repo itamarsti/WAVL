@@ -714,7 +714,7 @@ public String max()
 	  
 	  public String infoToString(WAVLNode node, String str){
 		  if (node.equals(null)){
-			  return str;			  
+			  return str;	
 		  }
 		  if (node.rank==0){
 			  str += node.info + " ";
