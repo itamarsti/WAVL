@@ -1,9 +1,9 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;           ////////////////////only for tests////////////////
 import java.util.Set;
+import java.util.TreeSet;
 
 //-------------------------------------------WAVLTree Class Builders-----------------------------------
 
@@ -122,7 +122,8 @@ public int insert(int k, String i) {
 		node.rank = 0; //can delete later if new node default rank is 0
 		int cnt = 0;
 		WAVLNode parent = node.parent;
-		if (parent.rank==1){							//if Case B
+		int pa_rank = parent.rank;
+		if (pa_rank==1){							//if Case B
 			return cnt;
 			}
 		else{										//if Case A: both node.parent kids were null
@@ -152,7 +153,7 @@ public int insert(int k, String i) {
 			case 2:
 				rotate(node,false);
 				node.right.rank -- ;
-				return cnt + 2;
+				return cnt + 1;
 			case 3:
 				WAVLNode chuck = node.right; //in presentation chuck = B
 				rotate(chuck,true);
@@ -160,11 +161,11 @@ public int insert(int k, String i) {
 				node.rank --;
 				chuck.rank ++ ;
 				chuck.right.rank -- ;
-				return cnt + 5;
+				return cnt + 2;
 			case 5: //**********************maybe more ranks should be changed, like in case 3 delete********
 				rotate(node,true);
 				node.left.rank --;
-				return cnt+2;
+				return cnt+1;
 			case 6:	
 				WAVLNode norris = node.left; //in presentation norris = B
 				rotate(norris,false);
@@ -172,7 +173,7 @@ public int insert(int k, String i) {
 				node.rank -- ;
 				norris.rank ++ ;
 				norris.left.rank -- ;
-				return cnt + 5; 
+				return cnt + 2; 
 		}
 		return 0;	
 	}//end of recursive rebalance helper func
@@ -319,6 +320,8 @@ public int delete(int k)
 				this.size--;
 				return cnt;
 			}
+			
+			
 		}
 		WAVLNode parent = node.parent;
 		if (node.rank==0){				//condition for a leaf
@@ -350,7 +353,7 @@ public int delete(int k)
 			return rebalanceDelete(tmp);
 			
 		}
-		else if ((node.right!=null&& node.left==null) || (node.left!=null&& node.right==null)) {	  //unary case
+		else if ((node.right!=null&& node.left==null) || (node.left!=null&& node.right==null)) {										                  //unary case
 			WAVLNode child;
 			if(node.left==null){
 				child = node.right;						//checking the child side
@@ -365,18 +368,19 @@ public int delete(int k)
 				child.parent = null;
 				this.size--;
 				return cnt;
-			}		
+			}
+			
 			if(rankLeft(parent) == 1 && rankRight(parent) ==1){    //node has 1-1 parent
-				replaceUnary(node, child);
+				replaceUnari(node, child);
 				return cnt;
 			}
 			else{
 				if((isLeft(node)&& rankLeft(parent)==1) ||(!isLeft(node)&& rankRight(parent)==1)){ 		//node has 1-rank difference of parent
-					replaceUnary(node,child);
+					replaceUnari(node,child);
 					return cnt;
 				}
 				else{					//node has 2-rank difference of his parent
-					replaceUnary(node, child);
+					replaceUnari(node, child);
 					return rebalanceDeleteRec(parent,cnt);
 					}
 				}
@@ -412,10 +416,9 @@ public int delete(int k)
 				node.rank--;
 				node.right.rank++; 		 //changing rank before rotate because node.right is different after rotate
 				rotate(node.right,true); //rotate left
-				cnt += 2;
+				cnt += 1;
 				if((rankLeft(node) == 2 && rankRight(node) == 2)&& (node.left==null && node.right==null)){ //node is a 2-2 leaf
 					node.rank--;
-					cnt++;
 				}
 				return cnt;
 			
@@ -426,17 +429,16 @@ public int delete(int k)
 				node.rank -= 2;
 				temp.rank += 2;
 				temp.right.rank--;  //should be after rotate
-				cnt+= 7;
+				cnt+= 2;
 				return cnt;
 				
 			case 13:							//symertric case of 3
 				node.rank--;
 				node.left.rank++;			//changing rank before rotate because node.right is different after rotate
 				rotate(node.left,false);		//rotate right
-				cnt += 2;
+				cnt += 1;
 				if((rankLeft(node) == 2 && rankRight(node) == 2)&& (node.left==null && node.right==null)){ //node is a 2-2 leaf
 					node.rank--;
-					cnt++;
 				}
 				return cnt;
 			
@@ -448,7 +450,7 @@ public int delete(int k)
 				node.rank -= 2;
 				temp14.rank += 2;
 				temp14.left.rank--; //should be after rotate
-				cnt+= 7;
+				cnt+= 2;
 				return cnt;			
 		}
 		return cnt;		//other cases
@@ -492,7 +494,7 @@ public int delete(int k)
 //------------------------------------GeneralMethods----------------------------------------------
 //------------------------------------RankRight----------------------------------------------
 	/**
-	 * 
+	 * must not be static mathod!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	 * @param node
 	 * @return
 	 */
@@ -545,7 +547,7 @@ public int delete(int k)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ReplaceUnariNode~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\\
 
-	private void replaceUnary(WAVLNode node, WAVLNode next){
+	private void replaceUnari(WAVLNode node, WAVLNode next){
 		WAVLNode parent = node.parent;
 		if(isLeft(node)){
 			parent.left = next;
@@ -605,7 +607,7 @@ public int delete(int k)
 /**
  * public String min()
  *
- * Returns the iîfo of the item with the smallest key in the tree,
+ * Returns the iÃ®fo of the item with the smallest key in the tree,
  * or null if the tree is empty
  */
 
@@ -637,17 +639,17 @@ public String max()
   * Returns a sorted array which contains all keys in the tree,
   * or an empty array if the tree is empty.
   */
- public int[] keysToArray(){
-	 WAVLNode[] arr = new WAVLNode[this.size];
-	 int[] finalArr = new int[this.size];
-     nodesArrayRec(this.root, arr,0);
-     for (int i=0; i<arr.length;i++){
-    	 finalArr[i] = arr[i].key;
-     }
-     return finalArr;             
+ public int[] keysToArray()
+ {
+       int[] arr = new int[this.size];
+       String final_str = "";
+       final_str = this.root.keyToString(this.root, final_str);
+       String[] str_arr = final_str.split(" ");
+       for (int i=0; i<arr.length;i++){
+       	arr[i] = Integer.parseInt(str_arr[i]);
+       }
+       return arr;             
  }
- 
-
 
 //------------------------------------InfoToArray----------------------------------------------
 
@@ -659,31 +661,12 @@ public String max()
   * or an empty array if the tree is empty.
   */
  public String[] infoToArray(){
-	 WAVLNode[] arr = new WAVLNode[this.size];
-	 String[] finalArr = new String[this.size];
-	 nodesArrayRec(this.root, arr,0);
-	 for (int i=0; i<arr.length;i++){
-    	 finalArr[i] = arr[i].info;
-     }
-     return finalArr;               
+       String final_str = "";
+       final_str = this.root.infoToString(this.root, final_str);
+       return final_str.split(" ");                    
  }
-//------------------------------------KeysToArrayRec------------------------------------------//
- 
-
-public int nodesArrayRec(WAVLNode node, WAVLNode[] arr_rec, int index){
-	 if (node == null){
-		 return index;
-	 }
-	 index = nodesArrayRec(node.left, arr_rec,index);
-	 arr_rec[index] = node;
-	 index++;
-	 index = nodesArrayRec(node.right, arr_rec,index);
-	 return index;
-}
- 
 
 
-//-------------------------------------------------------------------------------------\\
 
 /**
    * public int size()
@@ -726,48 +709,90 @@ public int nodesArrayRec(WAVLNode node, WAVLNode[] arr_rec, int index){
 		this.info = info;
 		
 	}
+
+//------------------------------------StringOfSortedKeys----------------------------------------------
+	  
+	  public String infoToString(WAVLNode node, String str){
+		  if (node.equals(null)){
+			  return str;			  
+		  }
+		  if (node.rank==0){
+			  str += node.info + " ";
+			  return str;
+		  }
+		  else{
+			  return infoToString(node.left, str)+node.info+ " "+infoToString(node.right, str);
+		  }	  
+	  }
+
+//------------------------------------StringOfSortedValues----------------------------------------------
+
+	  public String keyToString(WAVLNode node, String str){
+		  if (node.equals(null)){
+			  return str;			  
+		  }
+		  if (node.rank==0){
+			  str += node.key + " ";
+			  return str;
+		  }
+		  else{
+			  return infoToString(node.left, str)+node.key + " "+infoToString(node.right, str);
+		  }	  
+	  }
  }
- //-----------------------------------------------------------------------------------------//
  
-
-
  
 //------------------------------------MainFunction----------------------------------------------
 
   public static void main (String[] args){
 	
-	 
+	  
 	  WAVLTree b = new WAVLTree();
 		Random rand = new Random();
 		String s="";
 		
-		for (int i=0;i<1000;i++) //tree amount
+		int i = 1;
+		int totIn = 0;
+		int totDel = 0;
+		int minisert = 10000 * i;
+		int maxkey = Integer.MAX_VALUE;
+		int actions = 10000 * i * 2;
+		int max_del = 0;
+		int max_ins = 0;
+		
+		for (int trees=0;trees<1;trees++) //tree amount
 		{
-			int minisert = 10;
-			int maxkey = 30000;
-			int actions = 100;
+			
 			
 			b = new WAVLTree();			
-			int k=minisert+rand.nextInt(actions); //action amount
+			//int k=minisert+rand.nextInt(actions); //action amount
+			int k = actions;
 			
-			List<Integer> list = new ArrayList<Integer>();
+			//List<Integer> list = new ArrayList<Integer>();
+			TreeSet<Integer> list = new TreeSet<Integer>();
 			for(int j=0;j<k;j++){        //each action
 				boolean insert;
 				if( j < minisert){
 					insert = true;
 				}
 				else{
-					insert = rand.nextBoolean();
+					//insert = rand.nextBoolean();
+					insert = false;
 				}
 				if(insert){
 					int n=rand.nextInt(maxkey);
-					b.insert(n, "");
 					if(list.contains(n)){
 						j--;
 						continue;
 					}
 					else{
 					list.add(n);
+					}
+					//b.insert(n, "");
+					int insertPar = b.insert(n, "");
+					totIn += insertPar;
+					if (insertPar>max_ins){
+						max_ins = insertPar;
 					}
 				}
 				else if(!insert){
@@ -776,33 +801,36 @@ public int nodesArrayRec(WAVLNode node, WAVLNode[] arr_rec, int index){
 						continue;
 					}
 					else{
-						Integer deleteItem = rand.nextInt(list.size());
-						b.delete(list.get(deleteItem));
+						//Integer deleteItem = rand.nextInt(list.size());
+						//b.delete(list.get(deleteItem));
+						Integer deleteItem = list.first();
+						int deleteditem = b.delete(deleteItem);
+						totDel += deleteditem;
+						if (deleteditem>max_del){
+							max_del = deleteditem;
+						}
 						list.remove(deleteItem);
 					}
 				}
 			}
-			if(b.isWAVL(b.root)){
-				if(i%10 == 0){
-					System.out.println("tree number: "+i+" is WAVL"+"has "+k+" nodes");
+			if(isWAVL(b.root)){
+				if(trees%10 == 0){
+					System.out.println("tree number: "+trees+" is WAVL"+"has "+k+" nodes");
 					System.out.println(s);
 				}
 			}
 			else{
-				System.out.println("tree number: "+i+" is NOT WAVL"+"has "+k+" nodes");
+				System.out.println("tree number: "+trees+" is NOT WAVL"+"has "+k+" nodes");
 				return;			
 			}
 		}
-		WAVLTree yourMother = new WAVLTree();
-		yourMother.insert(6, "");
-		yourMother.insert(7, "");
-		yourMother.insert(8, "");
-		yourMother.insert(9, "");
-		yourMother.insert(10, "");
+		double avgIn = (double)totIn/(double)minisert;
+		double avgDel = (double)totDel/(double)minisert;
 
-		System.out.println(Arrays.toString(b.infoToArray()));
-		System.out.println(Arrays.toString(b.keysToArray()));
-	
+		System.out.println(avgIn);
+		System.out.println(avgDel);
+		System.out.println("maximum delete is "+max_del);
+		System.out.println("maximum insert is "+max_ins);
 		System.out.println("yeah");		
 	  }
 		
@@ -821,5 +849,5 @@ public int nodesArrayRec(WAVLNode node, WAVLNode[] arr_rec, int index){
 		  }
 		  return false;
 	}
-	
- }
+
+}
